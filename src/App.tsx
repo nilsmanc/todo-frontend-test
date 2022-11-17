@@ -1,26 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from 'react'
+
+import instance from './axios'
+import { Info } from './components/Info'
+import { List } from './components/List'
+import { TodoType } from './types'
 
 function App() {
+  const [todos, setTodos] = useState([])
+  console.log(todos)
+
+  const [todoId, setTodoId] = useState('')
+
+  const [todo, setTodo] = useState({} as TodoType)
+
+  const fetchTodos = async () => {
+    const { data } = await instance.get('/todos/')
+    setTodos(data)
+  }
+
+  const fetchTodo = async (id: string) => {
+    const { data } = await instance.get(`/todos/${id}`)
+    setTodo(data)
+  }
+
+  useEffect(() => {
+    fetchTodos()
+    fetchTodo(todoId)
+  }, [todoId])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <List todos={todos} setTodoId={setTodoId} />
+      <Info todo={todo} />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
