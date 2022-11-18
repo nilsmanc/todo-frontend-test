@@ -5,6 +5,8 @@ import { Info } from './components/Info'
 import { List } from './components/List'
 import { TodoType } from './types'
 
+import styles from './App.module.scss'
+
 function App() {
   const [todos, setTodos] = useState([])
 
@@ -20,7 +22,7 @@ function App() {
   }, [])
 
   return (
-    <div>
+    <div className={styles.wrapper}>
       <List todos={todos} setTodoId={setTodoId} />
       <Info todoId={todoId} />
     </div>

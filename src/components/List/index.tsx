@@ -15,6 +15,7 @@ export const List: React.FC<ListProps> = ({ todos, setTodoId }) => {
 
   return (
     <div className={styles.wrapper}>
+      <div className={styles.title}>Todo</div>
       {todos.map((todo: any) => (
         <Todo key={todo._id} clickHandler={clickHandler} todo={todo} />
       ))}

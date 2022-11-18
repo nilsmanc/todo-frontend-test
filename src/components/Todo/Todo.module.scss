@@ -1,4 +1,10 @@
 .wrapper {
+  display: grid;
+  grid-template-areas:
+    't d'
+    'a d';
+  grid-template-columns: 1fr 1fr;
+
   background-color: rgb(66, 95, 177);
   border-radius: 10px;
   width: 90%;
@@ -14,4 +20,9 @@
 
 .title {
   font-weight: bold;
+  grid-area: t;
+}
+
+.date {
+  grid-area: d;
 }
