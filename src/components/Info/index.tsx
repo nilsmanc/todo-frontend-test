@@ -1,27 +1,31 @@
 import { useEffect, useState } from 'react'
+import dayjs from 'dayjs'
+
 import instance from '../../axios'
-
 import { TodoType } from '../../types'
-
 import styles from './Info.module.scss'
 
 type InfoProps = {
   todoId: string
   setUpdate: any
+  isAdding: any
+  setIsAdding: any
 }
 
-export const Info: React.FC<InfoProps> = ({ todoId, setUpdate }) => {
+export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAdding }) => {
   const [todo, setTodo] = useState({} as TodoType)
 
   const [title, setTitle] = useState('')
 
   const [description, setDescription] = useState('')
 
+  const [date, setDate] = useState('')
+
   const [imageUrl, setImageUrl] = useState('')
 
-  console.log(imageUrl)
+  const [isDone, setIsDone] = useState(false)
 
-  const [isAdding, setIsAdding] = useState(false)
+  const formattedDate = dayjs(todo.date).format('YYYY MMM, ddd D')
 
   const fetchTodo = async (id: string) => {
     const { data } = await instance.get(`/todo/${id}`)
@@ -34,9 +38,10 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate }) => {
   }
 
   const toggleCreate = () => {
-    setIsAdding(true)
+    setIsAdding((prevState: boolean) => !prevState)
     setTitle('')
     setDescription('')
+    setDate('')
     setImageUrl('')
   }
 
@@ -57,8 +62,12 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate }) => {
     const todo = {
       title,
       description,
+      date,
       file: imageUrl,
+      done: isDone,
     }
+
+    console.log(todo)
 
     await instance.post('/todos', todo)
 
@@ -68,23 +77,33 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate }) => {
     setUpdate((prevState: boolean) => !prevState)
   }
 
-  const updateHandler = () => {
+  const updateHandler = async () => {
     const todo = {
       title,
       description,
       file: imageUrl,
+      done: isDone,
     }
-    console.log(todo)
 
     setImageUrl('')
-    instance.patch(`/todo/${todoId}`, todo)
+    await instance.patch(`/todo/${todoId}`, todo)
+    setUpdate((prevState: boolean) => !prevState)
+  }
+
+  const checkboxHandler = () => {
+    setIsDone(!isDone)
   }
 
   useEffect(() => {
     fetchTodo(todoId)
     setTitle(todo.title)
     setDescription(todo.description)
-  }, [todoId, todo.title, todo.description])
+    setImageUrl(todo.file)
+
+    return () => {
+      setImageUrl('')
+    }
+  }, [todoId, todo.title, todo.description, todo.file])
 
   return (
     <div className={styles.wrapper}>
@@ -94,18 +113,24 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate }) => {
         onChange={(e) => setDescription(e.target.value)}
         className={styles.description}
       />
-      <img src={todo.file} />
-
-      <button onClick={() => deleteHandler()}>Delete</button>
-      <button onClick={() => updateHandler()}>Update</button>
-      {!isAdding && <button onClick={() => toggleCreate()}>Create</button>}
-      {isAdding && (
-        <>
-          <img src={imageUrl} />
-          <button onClick={() => addHandler()}>Add Todo</button>
-          <input type='file' onChange={handleChangeFile} />
-        </>
-      )}
+      <div>{formattedDate}</div>
+      <div className={styles.skeleton} />
+      {!isAdding && todo.file && <img className={styles.image} src={todo.file} />}
+      <div className={styles.buttons}>
+        <button onClick={() => deleteHandler()}>Delete</button>
+        <button onClick={() => updateHandler()}>Update</button>
+        Done <input type='checkbox' checked={todo.done} onClick={checkboxHandler} />
+        {!isAdding && <button onClick={() => toggleCreate()}>Create</button>}
+        {isAdding && (
+          <>
+            <button onClick={() => toggleCreate()}>Cancel</button>
+            <button onClick={() => addHandler()}>Add Todo</button>
+            <input type='file' onChange={handleChangeFile} />
+            <input type='date' value={date} onChange={(e) => setDate(e.target.value)} />
+          </>
+        )}
+      </div>
+      {isAdding && imageUrl && <img className={styles.preview} src={imageUrl} alt='preview' />}
     </div>
   )
 }

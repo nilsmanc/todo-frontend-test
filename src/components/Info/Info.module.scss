@@ -1,4 +1,12 @@
 .wrapper {
+  display: grid;
+  grid-template-areas:
+    't t'
+    'd p'
+    'b b';
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 100px 1fr 30px;
+
   width: 60%;
   background-color: beige;
   border-radius: 5px;
@@ -6,7 +14,7 @@
 }
 
 .title {
-  display: block;
+  grid-area: t;
   width: 95%;
   font-weight: bold;
   background-color: rgb(122, 126, 179);
@@ -17,11 +25,36 @@
 }
 
 .description {
-  display: block;
-  height: 75%;
-  width: 95%;
-  margin: 0 auto;
+  grid-area: d;
+  height: 90%;
+  width: 90%;
+  margin-left: 20px;
 
   background-color: rgb(122, 126, 179);
   border-radius: 5px;
+}
+
+.preview {
+  grid-area: p;
+  width: 90%;
+  height: 90%;
+}
+
+.image {
+  grid-area: p;
+  width: 90%;
+  height: 90%;
+}
+
+.buttons {
+  grid-area: b;
+  display: flex;
+  justify-content: space-between;
+}
+
+.skeleton {
+  grid-area: p;
+  box-shadow: 0px 0px 0px 1px black;
+  width: 90%;
+  height: 90%;
 }

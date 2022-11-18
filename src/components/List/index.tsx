@@ -6,11 +6,12 @@ import styles from './List.module.scss'
 type ListProps = {
   todos: TodoType[]
   setTodoId: (id: string) => void
+  isAdding: any
 }
 
-export const List: React.FC<ListProps> = ({ todos, setTodoId }) => {
+export const List: React.FC<ListProps> = ({ todos, setTodoId, isAdding }) => {
   const clickHandler = (id: string) => {
-    setTodoId(id)
+    if (!isAdding) setTodoId(id)
   }
 
   return (
