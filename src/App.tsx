@@ -9,14 +9,18 @@ import styles from './App.module.scss'
 function App() {
   const [todos, setTodos] = useState([])
   const [todoId, setTodoId] = useState('')
-  const [update, setUpdate] = useState<boolean>(true)
-  const [isAdding, setIsAdding] = useState<boolean>(false)
+  const [update, setUpdate] = useState(true)
+  const [isAdding, setIsAdding] = useState(false)
 
+  /**
+   * Функция для получения массива туду
+   */
   const fetchTodos = async () => {
     const { data } = await instance.get('/todos')
     setTodos(data)
   }
 
+  // Получение нового массива при первом и ренедере и изменении update
   useEffect(() => {
     fetchTodos()
   }, [update])

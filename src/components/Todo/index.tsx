@@ -9,10 +9,22 @@ type TodoProps = {
 }
 
 export const Todo: React.FC<TodoProps> = ({ todo, clickHandler }) => {
+  /**
+   * Получение текущей даты и ее форматирование
+   */
   const today = dayjs().format('YYYY MM D')
+  /**
+   * Форматирование даты полученной из объекта туду
+   */
   const formattedDate = dayjs(todo.date).format('YYYY MM D')
+  /**
+   * Оборачивание для возможности сравнения дат
+   */
   const now = dayjs(today)
   const deadline = dayjs(formattedDate)
+  /**
+   * Сравнение дат, с разницей в днях. Если разница больше ноля, появляется надпись expired
+   */
   const difference = now.diff(deadline, 'day')
 
   return (

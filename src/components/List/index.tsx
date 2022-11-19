@@ -10,6 +10,9 @@ type ListProps = {
 }
 
 export const List: React.FC<ListProps> = ({ todos, setTodoId, isAdding }) => {
+  /**
+   * Обработчик клика для переключения туду
+   */
   const clickHandler = (id: string) => {
     if (!isAdding) setTodoId(id)
   }

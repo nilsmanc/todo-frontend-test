@@ -22,22 +22,40 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
   const [date, setDate] = useState('')
   const [fileUrl, setFileUrl] = useState('')
   const [isDone, setIsDone] = useState(false)
+  const [isDateChanging, setIsDateChanging] = useState(false)
 
-  const filename = fileUrl?.substring(30, fileUrl.length)
+  /**
+   * Возвращает имя файла из ссылки
+   */
+  const filename = fileUrl?.substring(49, fileUrl.length)
+  /**
+   * Возвращает расширение файла
+   */
   const extension = filename?.substring(filename.length - 3, filename.length)
+  /**
+   * Форматирование даты
+   */
+  const formattedDate = dayjs(date).format('D-MM-YYYY')
 
-  const formattedDate = dayjs(todo.date).format('D-MM-YYYY')
+  console.log(formattedDate)
 
+  /**
+   * Запрос одного туду
+   */
   const fetchTodo = async (id: string) => {
     const { data } = await instance.get(`/todo/${id}`)
     setTodo(data)
   }
-
+  /**
+   * Обработчик, отправляющий запрос на удаление туду и изменяющий состояние update, чтобы перерисовать весь список
+   */
   const deleteHandler = async () => {
     await instance.delete(`/todo/${todoId}`)
     setUpdate(!update)
   }
-
+  /**
+   * Переключатель очищающий состояние для создания нового туду
+   */
   const toggleCreate = () => {
     setIsAdding(!isAdding)
     setTitle('')
@@ -46,7 +64,9 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
     setIsDone(false)
     setFileUrl('')
   }
-
+  /**
+   * Отправляет файл на сервер и возвращает ссылку на него
+   */
   const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const formData = new FormData()
@@ -59,7 +79,9 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
       alert('Failed to upload file')
     }
   }
-
+  /**
+   * Собирает данные из стейтов и отправляет на сервер
+   */
   const addHandler = async () => {
     const todo = {
       title,
@@ -75,23 +97,32 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
     setIsAdding(false)
     setUpdate(!update)
   }
-
+  /**
+   * Собирает данные из стейтов и обновляет туду
+   */
   const updateHandler = async () => {
     const todo = {
       title,
       description,
+      date,
       file: fileUrl,
       done: isDone,
     }
 
     await instance.patch(`/todo/${todoId}`, todo)
-    setUpdate(!update)
-  }
 
+    setUpdate(!update)
+    setIsDateChanging(false)
+  }
+  /**
+   * Переключатель состояния done
+   */
   const checkboxHandler = () => {
     setIsDone(!isDone)
   }
-
+  /**
+   * Загружает файл с сервера
+   */
   const download = (event: React.MouseEvent) => {
     event.preventDefault()
 
@@ -100,35 +131,58 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
       method: 'GET',
       responseType: 'blob',
     }).then((response) => {
+      // создает ссылку на файл в памяти браузера
       const href = URL.createObjectURL(response.data)
-
+      // создает элемент 'a' со ссылкой на файл и клик
       const link = document.createElement('a')
       link.href = href
       link.setAttribute('download', filename)
       document.body.appendChild(link)
       link.click()
-
+      // очистка
       document.body.removeChild(link)
       URL.revokeObjectURL(href)
     })
   }
-
+  /**
+   * Запрос туду и заполнение полей
+   */
   useEffect(() => {
     fetchTodo(todoId)
     setTitle(todo.title)
     setDescription(todo.description)
     setFileUrl(todo.file)
     setIsDone(todo.done)
+    setDate(todo.date)
 
     return () => {
       setFileUrl('')
     }
-  }, [todoId, todo.title, todo.description, todo.file])
+  }, [todoId, todo.title, todo.description, todo.file, todo.date])
 
   return (
     <div className={styles.wrapper}>
       <textarea value={title} onChange={(e) => setTitle(e.target.value)} className={styles.title} />
-      {todo.title && <div className={styles.date}>Expire date: {formattedDate}</div>}
+      {todo.title && !isDateChanging && (
+        <div
+          onClick={() => {
+            setIsDateChanging(true)
+          }}
+          className={styles.date}>
+          Expire date: {formattedDate}
+        </div>
+      )}
+      {isDateChanging && (
+        <label>
+          <input
+            className={styles.hiddenDateInput}
+            type='date'
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+          <button onClick={() => setIsDateChanging(false)}>Cancel</button>
+        </label>
+      )}
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -147,7 +201,7 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
             <button onClick={() => updateHandler()} disabled={!todo.title}>
               Update
             </button>
-            <button onClick={(e) => download(e)}>Download File</button>
+            {filename && <button onClick={(e) => download(e)}>Download File</button>}
             <div>{filename}</div>
             <label>
               Done{' '}
@@ -164,9 +218,11 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
         {isAdding && (
           <>
             <button onClick={() => toggleCreate()}>Cancel</button>
-            <button onClick={() => addHandler()}>Add Todo</button>
             <input type='file' onChange={handleChangeFile} />
             <input type='date' value={date} onChange={(e) => setDate(e.target.value)} />
+            <button onClick={() => addHandler()} disabled={!date || !title || !description}>
+              Add Todo
+            </button>
           </>
         )}
       </div>
