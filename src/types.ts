@@ -1,6 +1,4 @@
 export type TodoType = {
-  createdAt: string
-  updatedAt: string
   description: string
   date: string
   file: string
