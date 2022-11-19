@@ -8,15 +8,12 @@ import styles from './App.module.scss'
 
 function App() {
   const [todos, setTodos] = useState([])
-
   const [todoId, setTodoId] = useState('')
-
-  const [update, setUpdate] = useState(true)
-
-  const [isAdding, setIsAdding] = useState(false)
+  const [update, setUpdate] = useState<boolean>(true)
+  const [isAdding, setIsAdding] = useState<boolean>(false)
 
   const fetchTodos = async () => {
-    const { data } = await instance.get('/todos/')
+    const { data } = await instance.get('/todos')
     setTodos(data)
   }
 
@@ -27,7 +24,13 @@ function App() {
   return (
     <div className={styles.wrapper}>
       <List todos={todos} setTodoId={setTodoId} isAdding={isAdding} />
-      <Info todoId={todoId} setUpdate={setUpdate} isAdding={isAdding} setIsAdding={setIsAdding} />
+      <Info
+        todoId={todoId}
+        update={update}
+        setUpdate={setUpdate}
+        isAdding={isAdding}
+        setIsAdding={setIsAdding}
+      />
     </div>
   )
 }

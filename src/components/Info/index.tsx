@@ -1,34 +1,30 @@
 import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
+import axios from 'axios'
 
 import instance from '../../axios'
 import { TodoType } from '../../types'
+
 import styles from './Info.module.scss'
-import axios from 'axios'
 
 type InfoProps = {
   todoId: string
-  setUpdate: any
-  isAdding: any
-  setIsAdding: any
+  update: boolean
+  setUpdate: (update: boolean) => void
+  isAdding: boolean
+  setIsAdding: (isAdding: boolean) => void
 }
 
-export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAdding }) => {
+export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding, setIsAdding }) => {
   const [todo, setTodo] = useState({} as TodoType)
-
   const [title, setTitle] = useState('')
-
   const [description, setDescription] = useState('')
-
   const [date, setDate] = useState('')
-
-  const [imageUrl, setImageUrl] = useState('')
-
-  const filename = imageUrl?.substring(30, imageUrl.length)
-
-  const extension = filename?.substring(filename.length - 3, filename.length)
-
+  const [fileUrl, setFileUrl] = useState('')
   const [isDone, setIsDone] = useState(false)
+
+  const filename = fileUrl?.substring(30, fileUrl.length)
+  const extension = filename?.substring(filename.length - 3, filename.length)
 
   const formattedDate = dayjs(todo.date).format('D-MM-YYYY')
 
@@ -39,25 +35,25 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
 
   const deleteHandler = async () => {
     await instance.delete(`/todo/${todoId}`)
-    setUpdate((prevState: boolean) => !prevState)
+    setUpdate(!update)
   }
 
   const toggleCreate = () => {
-    setIsAdding((prevState: boolean) => !prevState)
+    setIsAdding(!isAdding)
     setTitle('')
     setDescription('')
     setDate('')
     setIsDone(false)
-    setImageUrl('')
+    setFileUrl('')
   }
 
-  const handleChangeFile = async (event: any) => {
+  const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const formData = new FormData()
-      const file = event.target.files[0]
+      const file = event.target.files![0]
       formData.append('image', file)
       const { data } = await instance.post('/upload', formData)
-      setImageUrl('http://localhost:4444' + data.url)
+      setFileUrl('http://localhost:4444' + data.url)
     } catch (err) {
       console.warn(err)
       alert('Failed to upload file')
@@ -69,40 +65,39 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
       title,
       description,
       date,
-      file: imageUrl,
+      file: fileUrl,
       done: isDone,
     }
 
     await instance.post('/todos', todo)
 
-    setImageUrl('')
-
+    setFileUrl('')
     setIsAdding(false)
-    setUpdate((prevState: boolean) => !prevState)
+    setUpdate(!update)
   }
 
   const updateHandler = async () => {
     const todo = {
       title,
       description,
-      file: imageUrl,
+      file: fileUrl,
       done: isDone,
     }
 
-    setImageUrl('')
+    setFileUrl('')
     await instance.patch(`/todo/${todoId}`, todo)
-    setUpdate((prevState: boolean) => !prevState)
+    setUpdate(!update)
   }
 
   const checkboxHandler = () => {
     setIsDone(!isDone)
   }
 
-  const download = (e: any) => {
-    e.preventDefault()
+  const download = (event: React.MouseEvent) => {
+    event.preventDefault()
 
     axios({
-      url: imageUrl,
+      url: fileUrl,
       method: 'GET',
       responseType: 'blob',
     }).then((response) => {
@@ -123,17 +118,16 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
     fetchTodo(todoId)
     setTitle(todo.title)
     setDescription(todo.description)
-    setImageUrl(todo.file)
+    setFileUrl(todo.file)
     setIsDone(todo.done)
 
     return () => {
-      setImageUrl('')
+      setFileUrl('')
     }
   }, [todoId, todo.title, todo.description, todo.file])
 
   return (
     <div className={styles.wrapper}>
-      <button onClick={(e) => download(e)}>Download</button>
       <textarea value={title} onChange={(e) => setTitle(e.target.value)} className={styles.title} />
       {todo.title && <div className={styles.date}>Expire date: {formattedDate}</div>}
       <textarea
@@ -141,21 +135,21 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
         onChange={(e) => setDescription(e.target.value)}
         className={styles.description}
       />
-
       <div className={styles.skeleton} />
       {!isAdding && todo.file && extension === 'jpg' && (
         <img className={styles.image} src={todo.file} />
       )}
       <div className={styles.buttons}>
-        <button onClick={() => deleteHandler()} disabled={!todo.title}>
-          Delete
-        </button>
-        <button onClick={() => updateHandler()} disabled={!todo.title}>
-          Update
-        </button>
-
         {!isAdding && (
           <>
+            <button onClick={() => deleteHandler()} disabled={!todo.title}>
+              Delete
+            </button>
+            <button onClick={() => updateHandler()} disabled={!todo.title}>
+              Update
+            </button>
+            <button onClick={(e) => download(e)}>Download File</button>
+            <div>{filename}</div>
             <label>
               Done{' '}
               <input
@@ -177,7 +171,7 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
           </>
         )}
       </div>
-      {isAdding && imageUrl && <img className={styles.preview} src={imageUrl} alt='preview' />}
+      {isAdding && fileUrl && <img className={styles.preview} src={fileUrl} alt='preview' />}
     </div>
   )
 }

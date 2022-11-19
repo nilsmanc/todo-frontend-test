@@ -6,7 +6,7 @@ import styles from './List.module.scss'
 type ListProps = {
   todos: TodoType[]
   setTodoId: (id: string) => void
-  isAdding: any
+  isAdding: boolean
 }
 
 export const List: React.FC<ListProps> = ({ todos, setTodoId, isAdding }) => {
@@ -17,7 +17,7 @@ export const List: React.FC<ListProps> = ({ todos, setTodoId, isAdding }) => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.title}>Todo</div>
-      {todos.map((todo: any) => (
+      {todos.map((todo: TodoType) => (
         <Todo key={todo._id} clickHandler={clickHandler} todo={todo} />
       ))}
     </div>
