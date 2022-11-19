@@ -11,7 +11,6 @@ function App() {
   const [todoId, setTodoId] = useState('')
   const [update, setUpdate] = useState(true)
   const [isAdding, setIsAdding] = useState(false)
-
   /**
    * Функция для получения массива туду
    */
@@ -19,7 +18,6 @@ function App() {
     const { data } = await instance.get('/todos')
     setTodos(data)
   }
-
   // Получение нового массива при первом и ренедере и изменении update
   useEffect(() => {
     fetchTodos()

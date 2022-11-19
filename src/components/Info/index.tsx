@@ -23,7 +23,6 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
   const [fileUrl, setFileUrl] = useState('')
   const [isDone, setIsDone] = useState(false)
   const [isDateChanging, setIsDateChanging] = useState(false)
-
   /**
    * Возвращает имя файла из ссылки
    */
@@ -36,9 +35,6 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
    * Форматирование даты
    */
   const formattedDate = dayjs(date).format('D-MM-YYYY')
-
-  console.log(formattedDate)
-
   /**
    * Запрос одного туду
    */
@@ -94,6 +90,10 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
     await instance.post('/todos', todo)
 
     setFileUrl('')
+    setTitle('')
+    setDescription('')
+    setDate('')
+    setIsDone(false)
     setIsAdding(false)
     setUpdate(!update)
   }
@@ -226,7 +226,9 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
           </>
         )}
       </div>
-      {isAdding && fileUrl && <img className={styles.preview} src={fileUrl} alt='preview' />}
+      {isAdding && fileUrl && (extension === 'jpg' || extension === 'png') && (
+        <img className={styles.preview} src={fileUrl} alt='preview' />
+      )}
     </div>
   )
 }
