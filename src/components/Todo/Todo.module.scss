@@ -1,11 +1,11 @@
 .wrapper {
   display: grid;
   grid-template-areas:
-    't d'
-    'a d';
+    't s'
+    't d';
   grid-template-columns: 1fr 1fr;
 
-  background-color: rgb(66, 95, 177);
+  background-color: rgb(197, 202, 171);
   border-radius: 10px;
   width: 90%;
   margin: 0 auto;
@@ -23,6 +23,6 @@
   grid-area: t;
 }
 
-.date {
-  grid-area: d;
+.status {
+  grid-area: s;
 }

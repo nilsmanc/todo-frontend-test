@@ -1,11 +1,11 @@
 .wrapper {
   display: grid;
   grid-template-areas:
-    't t'
+    't a'
     'd p'
     'b b';
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 100px 1fr 30px;
+  grid-template-rows: 100px 1fr 40px;
 
   width: 60%;
   background-color: beige;
@@ -15,13 +15,19 @@
 
 .title {
   grid-area: t;
-  width: 95%;
+  width: 90%;
   font-weight: bold;
-  background-color: rgb(122, 126, 179);
+  background-color: rgb(255, 255, 255);
   margin: 0 auto !important;
   margin-top: 30px !important;
   margin-bottom: 30px !important;
+  margin-left: 20px !important;
   border-radius: 5px;
+}
+
+.date {
+  grid-area: a;
+  align-self: center;
 }
 
 .description {
@@ -30,7 +36,7 @@
   width: 90%;
   margin-left: 20px;
 
-  background-color: rgb(122, 126, 179);
+  background-color: rgb(255, 255, 255);
   border-radius: 5px;
 }
 
@@ -49,7 +55,8 @@
 .buttons {
   grid-area: b;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  margin-bottom: 10px;
 }
 
 .skeleton {

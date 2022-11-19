@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import instance from '../../axios'
 import { TodoType } from '../../types'
 import styles from './Info.module.scss'
+import axios from 'axios'
 
 type InfoProps = {
   todoId: string
@@ -23,9 +24,13 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
 
   const [imageUrl, setImageUrl] = useState('')
 
+  const filename = imageUrl?.substring(30, imageUrl.length)
+
+  const extension = filename?.substring(filename.length - 3, filename.length)
+
   const [isDone, setIsDone] = useState(false)
 
-  const formattedDate = dayjs(todo.date).format('YYYY MMM, ddd D')
+  const formattedDate = dayjs(todo.date).format('D-MM-YYYY')
 
   const fetchTodo = async (id: string) => {
     const { data } = await instance.get(`/todo/${id}`)
@@ -42,6 +47,7 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
     setTitle('')
     setDescription('')
     setDate('')
+    setIsDone(false)
     setImageUrl('')
   }
 
@@ -66,8 +72,6 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
       file: imageUrl,
       done: isDone,
     }
-
-    console.log(todo)
 
     await instance.post('/todos', todo)
 
@@ -94,11 +98,33 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
     setIsDone(!isDone)
   }
 
+  const download = (e: any) => {
+    e.preventDefault()
+
+    axios({
+      url: imageUrl,
+      method: 'GET',
+      responseType: 'blob',
+    }).then((response) => {
+      const href = URL.createObjectURL(response.data)
+
+      const link = document.createElement('a')
+      link.href = href
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+
+      document.body.removeChild(link)
+      URL.revokeObjectURL(href)
+    })
+  }
+
   useEffect(() => {
     fetchTodo(todoId)
     setTitle(todo.title)
     setDescription(todo.description)
     setImageUrl(todo.file)
+    setIsDone(todo.done)
 
     return () => {
       setImageUrl('')
@@ -107,20 +133,41 @@ export const Info: React.FC<InfoProps> = ({ todoId, setUpdate, isAdding, setIsAd
 
   return (
     <div className={styles.wrapper}>
+      <button onClick={(e) => download(e)}>Download</button>
       <textarea value={title} onChange={(e) => setTitle(e.target.value)} className={styles.title} />
+      {todo.title && <div className={styles.date}>Expire date: {formattedDate}</div>}
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         className={styles.description}
       />
-      <div>{formattedDate}</div>
+
       <div className={styles.skeleton} />
-      {!isAdding && todo.file && <img className={styles.image} src={todo.file} />}
+      {!isAdding && todo.file && extension === 'jpg' && (
+        <img className={styles.image} src={todo.file} />
+      )}
       <div className={styles.buttons}>
-        <button onClick={() => deleteHandler()}>Delete</button>
-        <button onClick={() => updateHandler()}>Update</button>
-        Done <input type='checkbox' checked={todo.done} onClick={checkboxHandler} />
-        {!isAdding && <button onClick={() => toggleCreate()}>Create</button>}
+        <button onClick={() => deleteHandler()} disabled={!todo.title}>
+          Delete
+        </button>
+        <button onClick={() => updateHandler()} disabled={!todo.title}>
+          Update
+        </button>
+
+        {!isAdding && (
+          <>
+            <label>
+              Done{' '}
+              <input
+                type='checkbox'
+                checked={isDone}
+                disabled={!todo.title}
+                onClick={checkboxHandler}
+              />
+            </label>
+            <button onClick={() => toggleCreate()}>Create</button>
+          </>
+        )}
         {isAdding && (
           <>
             <button onClick={() => toggleCreate()}>Cancel</button>
