@@ -84,7 +84,6 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
       done: isDone,
     }
 
-    setFileUrl('')
     await instance.patch(`/todo/${todoId}`, todo)
     setUpdate(!update)
   }
