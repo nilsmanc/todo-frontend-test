@@ -26,7 +26,7 @@ export const Info: React.FC<InfoProps> = ({ todoId, update, setUpdate, isAdding,
   /**
    * Возвращает имя файла из ссылки
    */
-  const filename = fileUrl?.substring(35, fileUrl.length)
+  const filename = fileUrl?.substring(44, fileUrl.length)
   /**
    * Возвращает расширение файла
    */
